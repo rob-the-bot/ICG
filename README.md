@@ -1,6 +1,6 @@
 Code supporting the manuscript: **Phylogenetically-Preserved Multiscale Neuronal Activity: Iterative Coarse-Graining Bridges Scale-Dependent Theories of Brain Function**
 
-**Get started: **
+**Get started:**
 To replicate the analysis, run the code "ICG" on your neuronal recordings.
 
 Example data can be found here: (10.5281/zenodo.13283803)
