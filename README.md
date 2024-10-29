@@ -1,12 +1,16 @@
-Code supporting the manuscript: **Phylogenetically-Preserved Multiscale Neuronal Activity: Iterative Coarse-Graining Bridges Scale-Dependent Theories of Brain Function**
+Code supporting the manuscript: **Multiscale organisation of neuronal activity unifies scale-dependent theories of brain function**
 
-**Get started:**
-To replicate the analysis, run the code "ICG" on your neuronal recordings.
+**How to Iteratively coarse-grain your data:**
+Run the code "ICG" on your time series. 
 
-Example data can be found here: (10.5281/zenodo.13283803)
+ICG will iteratively coarse-grain the time series by pairing variables by their Pearson correlation, then summing and repeating the procedure on the coarse-grained variables. 
 
-There is also code for running the analysis (info theory, kurtosis, variance, timescales), network models, and various null models.
+It will output the coarse-grained variables across as many levels as possible and the original index of the variables.
 
-If you have any questions please do reach out! 
+**Extra code**
+There is also code in the github for running the analysis (e.g., info theory, kurtosis, variance, timescales), network models, and various null models) specific to the paper.
+
+**I'm Stuck**
+If you have any questions, please reach out! 
 
 brandon (dot) munn @sydney.edu.au
