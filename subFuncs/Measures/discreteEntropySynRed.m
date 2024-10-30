@@ -28,7 +28,7 @@ localEntrpy_S2 = -1.*log2(prob_S2(ic)); %[bits]
 [~,ia,ic] = unique([S1(:) S2(:)],'rows');
 stateCount = histcounts(ic,numel(ia));
 prob_S1S2 = stateCount./sum(stateCount);
-localEntrpy_S1S2 = -1.*log2(prob_S1S2(ic)); %natural log [nats]
+localEntrpy_S1S2 = -1.*log2(prob_S1S2(ic)); %natural log [bits]
 
 %Red 
 localRedncy = min([localEntrpy_S1(:)'; localEntrpy_S2(:)']);
@@ -42,7 +42,5 @@ U2 = mean(localEntrpy_S2) - Redncy;
 %Synergy
 Syn = mean(localEntrpy_S1S2) - U1 - U2 - Redncy;
 
-%Balance of redundancy/synergy (R-S)
-%ME = mean(localEntrpy_S1S2);
 end
 

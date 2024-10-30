@@ -2,7 +2,10 @@ function [VarAct,KurAct,TscAct, VarK] = calcVKT(activityICG,fs)
 
 %Input:
 %activityICG - ICG ouput
-%fs - Samplinf frequency
+%fs - Sampling frequency
+
+%Output:
+%Variance/Timescale/Kurtosis across scales
 
 %% Variance
 VarAct = zeros(1,numel(activityICG));
@@ -75,7 +78,7 @@ for rr = 1:numel(activityICG)-1
     %Grab just the upper triangle
     %Find the indices of each element
     upTriIndx = find(triu(true(size(C)),1)>0);
-    [allRIndx, allCIndx] = ind2sub(size(C),upTriIndx);
+    %[allRIndx, allCIndx] = ind2sub(size(C),upTriIndx);
 
     %now it is a vector of correlation values
     C = C(upTriIndx);

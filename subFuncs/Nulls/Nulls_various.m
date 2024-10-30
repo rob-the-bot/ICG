@@ -22,9 +22,8 @@ allData = randn(2048,1e5);
 
 %% Data matched
 
-%load in some Data
-%load('fish1.mat')
-
+%load in some Data to match (
+CellAct = dat;
 %How much do you want to match
 allData = CellAct(1:2048,:);
 
@@ -112,9 +111,8 @@ A_PD_Mod = Sigma.*covMod_Binary;
 [V,D] = eig(A_PD_Mod);   % Calculate the eigendecomposition of your matrix (A = V*D*V')    
 % where "D" is a diagonal matrix holding the eigenvalues of your matrix "A"
 d= diag(D);      % Get the eigenvalues in a vector "d" 
-d(d <= 1e-7) = 1e-7;  % Set any eigenvalues that are lower than threshold "TH" ("TH" here being      
-% equal to 1e-7) to a fixed non-zero "small" value (here assumed equal to 1e-7)
-D_c = diag(d);        % Built the "corrected" diagonal matrix "D_c"
+d(d <= 1e-7) = 1e-7;  % Set any eigenvalues that are lower than threshold 1e-7 to a fixed non-zero small value 
+D_c = diag(d);        % Build the updated diagonal matrix "D_c"
 A_PD_Mod = V*D_c*V';
 
 X = randn(5e3,2048);
@@ -183,12 +181,8 @@ end
 %How do you want to generate a global signal
 smoothBM = @(x,n) conv(x,gausswin(n)/sum(gausswin(n)),'same');
 
-G = 1.*randn(1,nBins)+7;
-G = smoothBM(G,1000);
-
 hSlp = 1;
 G = abs(wfbm(hSlp,nBins));
-G = 10.*G./mean(G);
 
 % 
 G35 = 3.5.*G./mean(G);
