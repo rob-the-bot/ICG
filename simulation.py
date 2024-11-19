@@ -39,12 +39,6 @@ def generate_simple_cov(n: int, loc: float = 1) -> np.ndarray:
 
 
 def generate_random_cov(n: int, loc: float = 1) -> np.ndarray:
-    L = np.random.randn(n, n)
-    cov = L @ L.T
-    return loc * cov
-
-
-def generate_random_cov2(n: int, loc: float = 1) -> np.ndarray:
     cov = np.random.normal(loc=loc, scale=0.01, size=(n, n))
     cov = (cov + cov.T) / 2
     # change the diagonals to be 1
@@ -56,18 +50,16 @@ def generate_random_cov2(n: int, loc: float = 1) -> np.ndarray:
 
 
 # %% generate correlated data
-N = 8192
+N = 4096
 
 np.random.seed(42)
 means = np.random.randn(N)
-# use toeplitz matrix
-# cov = generate_toeplitz(N, loc=0.95)
-cov = generate_simple_cov(N, loc=0.04)
+cov = generate_simple_cov(N, loc=0.02)
 X = np.random.multivariate_normal(mean=means, cov=cov, size=5000).T
 corr_hat = np.corrcoef(X)
 logging.info(f"avg correlation value: {np.triu(corr_hat, k=1).mean():.3f}")
 
-#%% send data to MATLAB for ICG calculation
+# %% send data to MATLAB for ICG calculation
 
 with TemporaryFile() as f:
     logging.info(f"Writing to {f.name}")
