@@ -82,20 +82,33 @@ with TemporaryFile() as f:
 # %% Calculate summary statistics
 df = []
 for i, X in enumerate(res):
-    df.append((i, np.var(X, axis=1).mean()))
-df = pd.DataFrame(df, columns=["level", "averaged std"])
+    df.append((2**i, np.var(X, axis=1).mean()))
+df = pd.DataFrame(df, columns=["ensemble size", "averaged std"])
 df
 
 # %% fit linear regression and plot
 
-reg = LinearRegression().fit(df["level"].values[..., None], np.log2(df["averaged std"]))
+reg = LinearRegression().fit(
+    np.log10(df["ensemble size"].values[..., None]), np.log10(df["averaged std"])
+)
 
-df["log std"] = np.log2(df["averaged std"])
-fig, ax = plt.subplots(figsize=(3, 2), layout="constrained")
-sns.regplot(data=df, x="level", y="log std", color="black", ax=ax, marker="o")
+df["log std"] = np.log10(df["averaged std"])
+fig, ax = plt.subplots(figsize=(2, 2), layout="constrained")
+sns.regplot(
+    data=df,
+    x="ensemble size",
+    y="log std",
+    color="black",
+    ax=ax,
+    marker="o",
+    logx=True,
+    scatter_kws=dict(s=10, alpha=0.5, color="black"),
+)
 ax.set(
-    xlabel="log2(ensemble size)",
-    ylabel="log2(averaged std)",
+    xscale="log",
+    xticks=np.logspace(0, 4, 5),
+    xlabel="ensemble size",
+    ylabel="log10(averaged std)",
     title=f"Slope: {reg.coef_[0]:.3f}",
 )
 sns.despine()
