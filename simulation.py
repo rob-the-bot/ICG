@@ -3,13 +3,22 @@
 Created on Nov 18, 2024
 @author: Robert Wong
 """
+
+import logging
+from tempfile import TemporaryFile
+import subprocess
+
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.io import loadmat, savemat
 import pandas as pd
+from sklearn.linear_model import LinearRegression
 
-# %% generate correlated data
+# set up logging
+logging.basicConfig(level=logging.INFO)
+
+# %% functions which generate covariance matrices
 
 
 def generate_toeplitz(n: int, loc: float = 1) -> np.ndarray:
@@ -46,47 +55,55 @@ def generate_random_cov2(n: int, loc: float = 1) -> np.ndarray:
     return cov
 
 
-N = 8196
+# %% generate correlated data
+N = 8192
 
 np.random.seed(42)
 means = np.random.randn(N)
 # use toeplitz matrix
 # cov = generate_toeplitz(N, loc=0.95)
-cov = generate_simple_cov(N, loc=0.039)
+cov = generate_simple_cov(N, loc=0.04)
 X = np.random.multivariate_normal(mean=means, cov=cov, size=5000).T
-print(f"avg correlation value: {np.triu(np.corrcoef(X), k=1).mean():.3f}")
-savemat("input.mat", {"X": X.astype(np.float32)})
+corr_hat = np.corrcoef(X)
+logging.info(f"avg correlation value: {np.triu(corr_hat, k=1).mean():.3f}")
 
-# %% Load data
+#%% send data to MATLAB for ICG calculation
 
-data = loadmat("matlab.mat")["ans"].squeeze()
+with TemporaryFile() as f:
+    logging.info(f"Writing to {f.name}")
+    savemat(f.name, {"X": X.astype(np.float32)})
+    with TemporaryFile() as f2:
+        logging.info(f"Calculating in MATLAB")
+        # call matlab to calculate results
+        result = subprocess.run(
+            ["matlab", "-batch", f"run_ICG('{f.name}', '{f2.name}')"],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            logging.error(f"MATLAB error: {result.stderr}")
+        else:
+            logging.info(f"MATLAB output: {result.stdout}")
 
-# Calculate summary statistics and save
-res = []
-for i, X in enumerate(data):
-    res.append((i, np.var(X, axis=1).mean()))
+        res = loadmat(f2.name)["res"].squeeze()
 
-# %% linear regression
-
-df = pd.DataFrame(res, columns=["level", "averaged std"])
+# %% Calculate summary statistics
+df = []
+for i, X in enumerate(res):
+    df.append((i, np.var(X, axis=1).mean()))
+df = pd.DataFrame(df, columns=["level", "averaged std"])
 df
 
-# %% fit linear regression to find the slope
-from sklearn.linear_model import LinearRegression
+# %% fit linear regression and plot
 
-x = df["level"].values.reshape(-1, 1)
-y = np.log2(df["averaged std"].values)
-reg = LinearRegression().fit(x, y)
-print(f"R^2: {reg.score(x, y)}")
-print(f"Slope: {reg.coef_[0]}")
-
-# %% plots
+reg = LinearRegression().fit(df["level"].values[..., None], np.log2(df["averaged std"]))
 
 df["log std"] = np.log2(df["averaged std"])
 fig, ax = plt.subplots(figsize=(3, 2), layout="constrained")
 sns.regplot(data=df, x="level", y="log std", color="black", ax=ax, marker="o")
-# set y-scale to log
-# ax.set_yscale("log")
+ax.set(
+    xlabel="log2(ensemble size)",
+    ylabel="log2(averaged std)",
+    title=f"Slope: {reg.coef_[0]:.3f}",
+)
 sns.despine()
-
-# %%
